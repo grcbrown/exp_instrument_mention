@@ -21,14 +21,15 @@ timeline.push(irb);
 //INSTRUCTIONS//
 const instructions = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p><font size='3'>INSTRUCTIONS HERE<br><br>When you're ready to begin, click ‘Start’.</font></p>",
+    stimulus: "You will complete a fill in the blank task. During each trial, you will be presented with a single sentence. Each sentence will have a blank text box where you can provide fillers to complete the sentence. To provide a response, click on the text box in the sentence and type your response. For each sentence, provide at least three possible fillers. Please separate each filler using commas. An example of the preferred response format is provided below:<br><br>"+'<p style="font-weight:bold;">'+"The man gave ________ to the dog."+'</p>'+"<br>Acceptable response format: a toy, food, the bone<br><br>Unacceptable response format: a toy food the bone<br><br>If you understand the instructions, and you are ready to begin, click ‘Start’.<br><br>",
     choices: ['Start']
 };
 
 //push to the timeline
 timeline.push(instructions);
 
-// TRIALS
+
+// TRIALS //
 let trial_array = create_tv_array(trial_objects);
 const trials = {
     timeline: [
@@ -38,6 +39,7 @@ const trials = {
             allow_blanks: false,
             button_text: 'Continue',
             data: {
+                text: jsPsych.timelineVariable('text'),
                 tag: jsPsych.timelineVariable('tag'),
                 uvi: jsPsych.timelineVariable('uvi'),
                 k_class: jsPsych.timelineVariable('k_class'),
@@ -46,19 +48,44 @@ const trials = {
             on_finish: function(data) {
                 jsPsych.setProgressBar((data.trial_index - 1) / (timeline.length + trial_array.length));
             }
-        },
-        {
-            type: jsPsychHtmlKeyboardResponse,
-            choices: [""],
-            stimulus: "",
-            response_ends_trial: false,
-            trial_duration: 500
         }
     ],
     timeline_variables: trial_objects, //this is what is referencing the trials that were externally created
     randomize_order: true
 };
 timeline.push(trials);
+
+let trial_array_2 = create_tv_array(extras);
+const trials_2 = {
+    timeline: [
+        {
+            type: jsPsychCloze,
+            text: jsPsych.timelineVariable('text'),
+            allow_blanks: false,
+            button_text: 'Continue',
+            data: {
+                text: jsPsych.timelineVariable('text'),
+                tag: jsPsych.timelineVariable('tag'),
+                uvi: jsPsych.timelineVariable('uvi'),
+                k_class: jsPsych.timelineVariable('k_class'),
+                stim_id: jsPsych.timelineVariable('stim_id')
+            },
+            on_finish: function(data) {
+                jsPsych.setProgressBar((data.trial_index - 1) / (timeline.length + trial_array_2.length));
+            }
+        }
+    ],
+    timeline_variables: extras, //this is what is referencing the trials that were externally created
+    randomize_order: true
+};
+timeline.push(trials_2);
+
+const transition = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "You have completed the experimental trials. You will now see a short demographic questionnaire. This questionnaire is optional. Please answer the following questions if you are comfortable doing so.",
+    choices: ['Continue']
+};
+timeline.push(transition);
 
 const questionnaire = {
     type: jsPsychSurvey,
@@ -70,9 +97,9 @@ const questionnaire = {
             },
             {
                 type: 'multi-choice',
-                prompt: 'Did you read the instructions and do you think you did the task correctly?', 
+                prompt: 'Did you read and understand the instructions?', 
                 name: 'correct', 
-                options: ['Yes', 'No', 'I was confused']
+                options: ['Yes', 'No']
             },
             {
                 type: 'drop-down',
